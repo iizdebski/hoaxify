@@ -2,6 +2,7 @@ package com.hoaxify.hoaxify;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.hoaxify.hoaxify.shared.GenericResponse;
 import com.hoaxify.hoaxify.user.UserRepository;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -46,6 +47,21 @@ public class UserControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
+    @Test
+    public void postUser_whenUserIsValid_userSavedToDatabase() {
+        User user = createValidUser();
+        testRestTemplate.postForEntity(API_1_0_USERS, user, Object.class);
+        assertThat(userRepository.count()).isEqualTo(1);
+
+    }
+
+    @Test
+    public void postUser_whenUserIsValid_receiveOkAndReceiveSuccessMessage() {
+        User user = createValidUser();
+        ResponseEntity<GenericResponse> response = testRestTemplate.postForEntity(API_1_0_USERS, user, GenericResponse.class);
+        assertThat(response.getBody().getMessage()).isNotNull();
+    }
+
     private User createValidUser() {
         User user = new User();
         user.setUsername("test-user");
@@ -54,11 +70,4 @@ public class UserControllerTest {
         return user;
     }
 
-    @Test
-    public void postUser_whenUserIsValid_userSavedToDatabase() {
-        User user = createValidUser();
-        testRestTemplate.postForEntity(API_1_0_USERS, user, Object.class);
-        assertThat(userRepository.count()).isEqualTo(1);
-
-    }
 }
