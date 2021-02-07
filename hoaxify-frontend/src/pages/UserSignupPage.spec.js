@@ -1,9 +1,11 @@
 import React from 'react';
-import { render, cleanup, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
+import {
+  render,
+  fireEvent,
+  waitForElementToBeRemoved,
+  waitForDomChange,
+} from '@testing-library/react';
 import { UserSignupPage } from './UserSignupPage';
-
-beforeEach(cleanup);
 
 describe('UserSignupPage', () => {
   describe('Layout', () => {
@@ -52,9 +54,19 @@ describe('UserSignupPage', () => {
     const changeEvent = (content) => {
       return {
         target: {
-          value: content
-        }
+          value: content,
+        },
       };
+    };
+
+    const mockAsyncDelayed = () => {
+      return jest.fn().mockImplementation(() => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            resolve({});
+          }, 300);
+        });
+      });
     };
 
     let button, displayNameInput, usernameInput, passwordInput, passwordRepeat;
@@ -116,7 +128,7 @@ describe('UserSignupPage', () => {
 
     it('calls postSignup when the fields are valid and the actions are provided in props', () => {
       const actions = {
-        postSignup: jest.fn().mockResolvedValueOnce({})
+        postSignup: jest.fn().mockResolvedValueOnce({}),
       };
       setupForSubmit({ actions });
       fireEvent.click(button);
@@ -130,16 +142,75 @@ describe('UserSignupPage', () => {
 
     it('calls post with user body when the fields are valid', () => {
       const actions = {
-        postSignup: jest.fn().mockResolvedValueOnce({})
+        postSignup: jest.fn().mockResolvedValueOnce({}),
       };
       setupForSubmit({ actions });
       fireEvent.click(button);
       const expectedUserObject = {
         username: 'my-user-name',
         displayName: 'my-display-name',
-        password: 'P4ssword'
+        password: 'P4ssword',
       };
       expect(actions.postSignup).toHaveBeenCalledWith(expectedUserObject);
     });
+
+    it('does not allow user to click the Sign Up button when there is an ongoing api call', () => {
+      const actions = {
+        postSignup: mockAsyncDelayed(),
+      };
+      setupForSubmit({ actions });
+      fireEvent.click(button);
+
+      fireEvent.click(button);
+      expect(actions.postSignup).toHaveBeenCalledTimes(1);
+    });
+
+    it('displays spinner when there is an ongoing api call', () => {
+      const actions = {
+        postSignup: mockAsyncDelayed()
+      };
+      const { queryByText } = setupForSubmit({ actions });
+      fireEvent.click(button);
+
+      const spinner = queryByText('Loading...');
+      expect(spinner).toBeInTheDocument();
+    });  
+    
+    
+    it('hides spinner after api call finishes successfully', async () => {
+      const actions = {
+        postSignup: mockAsyncDelayed()
+      };
+      const { queryByText } = setupForSubmit({ actions });
+      fireEvent.click(button);
+
+      await waitForDomChange();
+
+      const spinner = queryByText('Loading...');
+      expect(spinner).not.toBeInTheDocument();
+    });  
+
+    it('hides spinner after api call finishes with error', async () => {
+      const actions = {
+        postSignup: jest.fn().mockImplementation(() => {
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              reject({
+                response: {data: {}}
+              });
+            }, 300);
+          });
+        })
+      };
+      const { queryByText } = setupForSubmit({ actions });
+      fireEvent.click(button);
+
+      await waitForDomChange();
+
+      const spinner = queryByText('Loading...');
+      expect(spinner).not.toBeInTheDocument();
+    }); 
   });
 });
+
+console.error = () => {};
