@@ -17,3 +17,8 @@
           hibernate.ddl-auto: update
           generate-ddl: true
           show-sql: true
+          properties:
+            javax:
+              persistence:
+                validation:
+                  mode: none
