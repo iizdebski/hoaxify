@@ -12,4 +12,5 @@ public class GenericResponse {
     public GenericResponse(String message) {
         this.message = message;
     }
+
 }
