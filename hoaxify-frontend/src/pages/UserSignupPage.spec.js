@@ -1,11 +1,15 @@
 import React from 'react';
 import {
   render,
+  cleanup,
   fireEvent,
-  waitForElementToBeRemoved,
   waitForDomChange,
+  waitForElement
 } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 import { UserSignupPage } from './UserSignupPage';
+
+beforeEach(cleanup);
 
 describe('UserSignupPage', () => {
   describe('Layout', () => {
@@ -54,8 +58,8 @@ describe('UserSignupPage', () => {
     const changeEvent = (content) => {
       return {
         target: {
-          value: content,
-        },
+          value: content
+        }
       };
     };
 
@@ -128,7 +132,7 @@ describe('UserSignupPage', () => {
 
     it('calls postSignup when the fields are valid and the actions are provided in props', () => {
       const actions = {
-        postSignup: jest.fn().mockResolvedValueOnce({}),
+        postSignup: jest.fn().mockResolvedValueOnce({})
       };
       setupForSubmit({ actions });
       fireEvent.click(button);
@@ -142,21 +146,21 @@ describe('UserSignupPage', () => {
 
     it('calls post with user body when the fields are valid', () => {
       const actions = {
-        postSignup: jest.fn().mockResolvedValueOnce({}),
+        postSignup: jest.fn().mockResolvedValueOnce({})
       };
       setupForSubmit({ actions });
       fireEvent.click(button);
       const expectedUserObject = {
         username: 'my-user-name',
         displayName: 'my-display-name',
-        password: 'P4ssword',
+        password: 'P4ssword'
       };
       expect(actions.postSignup).toHaveBeenCalledWith(expectedUserObject);
     });
 
     it('does not allow user to click the Sign Up button when there is an ongoing api call', () => {
       const actions = {
-        postSignup: mockAsyncDelayed(),
+        postSignup: mockAsyncDelayed()
       };
       setupForSubmit({ actions });
       fireEvent.click(button);
@@ -174,9 +178,8 @@ describe('UserSignupPage', () => {
 
       const spinner = queryByText('Loading...');
       expect(spinner).toBeInTheDocument();
-    });  
-    
-    
+    });
+
     it('hides spinner after api call finishes successfully', async () => {
       const actions = {
         postSignup: mockAsyncDelayed()
@@ -188,7 +191,7 @@ describe('UserSignupPage', () => {
 
       const spinner = queryByText('Loading...');
       expect(spinner).not.toBeInTheDocument();
-    });  
+    });
 
     it('hides spinner after api call finishes with error', async () => {
       const actions = {
@@ -196,7 +199,7 @@ describe('UserSignupPage', () => {
           return new Promise((resolve, reject) => {
             setTimeout(() => {
               reject({
-                response: {data: {}}
+                response: { data: {} }
               });
             }, 300);
           });
@@ -209,7 +212,28 @@ describe('UserSignupPage', () => {
 
       const spinner = queryByText('Loading...');
       expect(spinner).not.toBeInTheDocument();
-    }); 
+    });
+
+    it('displays validation error for displayName when error is received for the field', async () => {
+      const actions = {
+        postSignup: jest.fn().mockRejectedValue({
+          response: {
+            data: {
+              validationErrors: {
+                displayName: 'Cannot be null',
+              },
+            },
+          },
+        }),
+      };
+      const { findByText } = setupForSubmit({ actions });
+      fireEvent.click(button);
+
+      const errorMessage = await findByText('Cannot be null');
+
+      expect(errorMessage).toBeInTheDocument();
+    });
+
   });
 });
 
