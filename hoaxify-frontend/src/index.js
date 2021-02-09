@@ -1,18 +1,20 @@
 import React from 'react';
+import reportWebVitals from './reportWebVitals';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import { UserSignupPage } from './pages/UserSignupPage';
-import { LoginPage } from './pages/LoginPage';
+import { HashRouter } from 'react-router-dom';
+import App from './containers/App';
 import * as apiCalls from './api/apiCalls';
+
 
 const actions = {
     postLogin: apiCalls.login
 }
 
 ReactDOM.render(
-    <LoginPage actions={actions} />,
+    <HashRouter>
+        <App />
+    </HashRouter>,
     document.getElementById('root')
 );
 
