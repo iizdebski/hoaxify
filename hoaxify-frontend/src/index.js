@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import { UserSignupPage } from './pages/UserSignupPage';
+import { LoginPage } from './pages/UserSignupPage';
 import reportWebVitals from './reportWebVitals';
 import * as apiCalls from './api/apiCalls';
 
@@ -10,10 +11,8 @@ const actions = {
     postSignup: apiCalls.signup
 }
 
-ReactDOM.render(
-<UserSignupPage actions={actions} />, 
-document.getElementById('root')
-);
+ReactDOM.render(<LoginPage />,
+    document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
