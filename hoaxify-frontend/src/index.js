@@ -2,9 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import { UserSignupPage } from './pages/UserSignupPage';
-import { LoginPage } from './pages/UserSignupPage';
 import reportWebVitals from './reportWebVitals';
+import { UserSignupPage } from './pages/UserSignupPage';
+import { LoginPage } from './pages/LoginPage';
 import * as apiCalls from './api/apiCalls';
 
 const actions = {
