@@ -2,6 +2,7 @@ import React from 'react';
 import Input from '../components/Input';
 import ButtonWithProgress from '../components/ButtonWithProgress';
 import { connect } from 'react-redux';
+import * as authActions from '../redux/authActions';
 
 export class LoginPage extends React.Component {
     state = {
@@ -28,7 +29,26 @@ export class LoginPage extends React.Component {
     };
 
     onClickLogin = () => {
-
+        const body = {
+            username: this.state.username,
+            password: this.state.password
+        };
+        this.setState({ pendingApiCall: true });
+        this.props.actions
+            .postLogin(body)
+            .then((response) => {
+                this.setState({ pendingApiCall: false }, () => {
+                    this.props.history.push('/');
+                });
+            })
+            .catch((error) => {
+                if (error.response) {
+                    this.setState({
+                        apiError: error.response.data.message,
+                        pendingApiCall: false
+                    });
+                }
+            });
     };
 
     render() {
@@ -85,4 +105,15 @@ LoginPage.defaultProps = {
     dispatch: () => { }
 };
 
-export default connect()(LoginPage);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        actions: {
+            postLogin: (body) => dispatch(authActions.loginHandler(body))
+        }
+    };
+};
+
+export default connect(
+    null,
+    mapDispatchToProps
+)(LoginPage);
