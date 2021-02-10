@@ -28,34 +28,7 @@ export class LoginPage extends React.Component {
     };
 
     onClickLogin = () => {
-        const body = {
-            username: this.state.username,
-            password: this.state.password
-        };
-        this.setState({ pendingApiCall: true });
-        this.props.actions
-            .postLogin(body)
-            .then((response) => {
-                const action = {
-                    type: 'login-success',
-                    payload: {
-                        ...response.data,
-                        password: this.state.password
-                    }
-                };
-                this.props.dispatch(action);
-                this.setState({ pendingApiCall: false }, () => {
-                    this.props.history.push('/');
-                });
-            })
-            .catch((error) => {
-                if (error.response) {
-                    this.setState({
-                        apiError: error.response.data.message,
-                        pendingApiCall: false
-                    });
-                }
-            });
+
     };
 
     render() {
