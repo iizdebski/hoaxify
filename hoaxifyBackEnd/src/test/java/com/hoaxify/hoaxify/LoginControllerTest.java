@@ -138,6 +138,11 @@ public class LoginControllerTest {
         assertThat(body.containsKey("password")).isFalse();
     }
 
+    @Test
+    public void getUsers_whenPageIsRequestedFor3ItemsPerPageWhereTheDatabaseHas20Users_receive3Users() {
+
+    }
+
     private void authenticate() {
         testRestTemplate.getRestTemplate()
                 .getInterceptors().add(new BasicAuthenticationInterceptor("test-user", "P4ssword"));
