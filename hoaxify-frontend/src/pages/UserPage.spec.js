@@ -18,7 +18,7 @@ const mockFailGetUser = {
             message: 'User not found'
         }
     }
-}
+};
 
 const match = {
     params: {
@@ -28,7 +28,7 @@ const match = {
 
 const setup = (props) => {
     return render(<UserPage {...props} />);
-}
+};
 
 describe('UserPage', () => {
     describe('Layout', () => {
@@ -37,22 +37,32 @@ describe('UserPage', () => {
             const userPageDiv = queryByTestId('userpage');
             expect(userPageDiv).toBeInTheDocument();
         });
-
         it('displays the displayName@username when user data loaded', async () => {
             apiCalls.getUser = jest.fn().mockResolvedValue(mockSuccessGetUser);
             const { queryByText } = setup({ match });
             const text = await waitForElement(() => queryByText('display1@user1'));
             expect(text).toBeInTheDocument();
         });
-
         it('displays not found alert when user not found', async () => {
             apiCalls.getUser = jest.fn().mockRejectedValue(mockFailGetUser);
             const { queryByText } = setup({ match });
             const alert = await waitForElement(() => queryByText('User not found'));
             expect(alert).toBeInTheDocument();
         });
+        it('displays spinner while loading user data', () => {
+            const mockDelayedResponse = jest.fn().mockImplementation(() => {
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        resolve(mockSuccessGetUser);
+                    }, 300);
+                });
+            });
+            apiCalls.getUser = mockDelayedResponse;
+            const { queryByText } = setup({ match });
+            const spinner = queryByText('Loading...');
+            expect(spinner).toBeInTheDocument();
+        });
     });
-
     describe('Lifecycle', () => {
         it('calls getUser when it is rendered', () => {
             apiCalls.getUser = jest.fn().mockResolvedValue(mockSuccessGetUser);
