@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.hoaxify.hoaxify.user.UserService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +27,7 @@ import com.hoaxify.hoaxify.error.ApiError;
 import com.hoaxify.hoaxify.shared.GenericResponse;
 import com.hoaxify.hoaxify.user.User;
 import com.hoaxify.hoaxify.user.UserRepository;
+import com.hoaxify.hoaxify.user.UserService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -314,7 +315,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void getUsers_whenUserLoggedIn_receivePageWithoutLoggedInUser() {
+    public void getUsers_whenUserLoggedIn_receivePageWithouLoggedInUser() {
         userService.save(TestUtil.createValidUser("user1"));
         userService.save(TestUtil.createValidUser("user2"));
         userService.save(TestUtil.createValidUser("user3"));
@@ -338,17 +339,47 @@ public class UserControllerTest {
         ResponseEntity<String> response = getUser(username, String.class);
         assertThat(response.getBody().contains("password")).isFalse();
     }
-
     @Test
     public void getUserByUsername_whenUserDoesNotExist_receiveNotFound() {
         ResponseEntity<Object> response = getUser("unknown-user", Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
-
     @Test
     public void getUserByUsername_whenUserDoesNotExist_receiveApiError() {
         ResponseEntity<ApiError> response = getUser("unknown-user", ApiError.class);
         assertThat(response.getBody().getMessage().contains("unknown-use")).isTrue();
+    }
+
+    @Test
+    public void putUser_whenUnauthorizedUserSendsTheRequest_receiveUnauthorized() {
+        ResponseEntity<Object> response = putUser(123, null, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    public void putUser_whenAuthorizedUserSendsUpdateForAnotherUser_receiveForbidden() {
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate(user.getUsername());
+
+        long anotherUserId = user.getId() + 123;
+        ResponseEntity<Object> response = putUser(anotherUserId, null, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void putUser_whenUnauthorizedUserSendsTheRequest_receiveApiError() {
+        ResponseEntity<ApiError> response = putUser(123, null, ApiError.class);
+        assertThat(response.getBody().getUrl()).contains("users/123");
+    }
+
+    @Test
+    public void putUser_whenAuthorizedUserSendsUpdateForAnotherUser_receiveApiError() {
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate(user.getUsername());
+
+        long anotherUserId = user.getId() + 123;
+        ResponseEntity<ApiError> response = putUser(anotherUserId, null, ApiError.class);
+        assertThat(response.getBody().getUrl()).contains("users/"+anotherUserId);
     }
 
     private void authenticate(String username) {
@@ -372,4 +403,10 @@ public class UserControllerTest {
         String path = API_1_0_USERS + "/" + username;
         return testRestTemplate.getForEntity(path, responseType);
     }
+
+    public <T> ResponseEntity<T> putUser(long id, HttpEntity<?> requestEntity, Class<T> responseType){
+        String path = API_1_0_USERS + "/" + id;
+        return testRestTemplate.exchange(path, HttpMethod.PUT, requestEntity, responseType);
+    }
+
 }
