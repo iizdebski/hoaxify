@@ -28,3 +28,5 @@
             pageable:
               default-page-size: 10
               max-page-size: 100
+      hoaxify:
+        upload-path: upload-test
