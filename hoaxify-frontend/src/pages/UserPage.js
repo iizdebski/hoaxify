@@ -10,7 +10,8 @@ class UserPage extends React.Component {
         isLoadingUser: false,
         inEditMode: false,
         originalDisplayName: undefined,
-        pendingUpdateCall: false
+        pendingUpdateCall: false,
+        image: undefined
     };
     componentDidMount() {
         this.loadUser();
@@ -54,23 +55,29 @@ class UserPage extends React.Component {
         this.setState({
             user,
             originalDisplayName: undefined,
-            inEditMode: false
+            inEditMode: false,
+            image: undefined
         });
     };
 
     onClickSave = () => {
         const userId = this.props.loggedInUser.id;
         const userUpdate = {
-            displayName: this.state.user.displayName
+            displayName: this.state.user.displayName,
+            image: this.state.image && this.state.image.split(',')[1]
         };
         this.setState({ pendingUpdateCall: true });
         apiCalls
             .updateUser(userId, userUpdate)
             .then((response) => {
+                const user = { ...this.state.user }
+                user.image = response.data.image;
                 this.setState({
                     inEditMode: false,
                     originalDisplayName: undefined,
-                    pendingUpdateCall: false
+                    pendingUpdateCall: false,
+                    user,
+                    image: undefined
                 });
             })
             .catch((error) => {
@@ -89,6 +96,20 @@ class UserPage extends React.Component {
         user.displayName = event.target.value;
         this.setState({ user, originalDisplayName });
     };
+
+    onFileSelect = (event) => {
+        if (event.target.files.length === 0) {
+            return;
+        }
+        const file = event.target.files[0];
+        let reader = new FileReader();
+        reader.onloadend = () => {
+            this.setState({
+                image: reader.result
+            })
+        }
+        reader.readAsDataURL(file);
+    }
 
     render() {
         let pageContent;
@@ -122,6 +143,8 @@ class UserPage extends React.Component {
                     onClickSave={this.onClickSave}
                     onChangeDisplayName={this.onChangeDisplayName}
                     pendingUpdateCall={this.state.pendingUpdateCall}
+                    loadedImage={this.state.image}
+                    onFileSelect={this.onFileSelect}
                 />
             );
         }
