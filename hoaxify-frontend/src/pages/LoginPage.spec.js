@@ -46,7 +46,6 @@ describe('LoginPage', () => {
                 }
             };
         };
-
         const mockAsyncDelayed = () => {
             return jest.fn().mockImplementation(() => {
                 return new Promise((resolve, reject) => {
@@ -56,7 +55,6 @@ describe('LoginPage', () => {
                 });
             });
         };
-
         let usernameInput, passwordInput, button;
 
         const setupForSubmit = (props) => {
@@ -200,7 +198,6 @@ describe('LoginPage', () => {
             const { queryByText } = setupForSubmit({ actions });
             fireEvent.click(button);
 
-
             const spinner = queryByText('Loading...');
             expect(spinner).toBeInTheDocument();
         });
@@ -217,7 +214,6 @@ describe('LoginPage', () => {
             const spinner = queryByText('Loading...');
             expect(spinner).not.toBeInTheDocument();
         });
-
         it('hides spinner after api call finishes with error', async () => {
             const actions = {
                 postLogin: jest.fn().mockImplementation(() => {
@@ -238,8 +234,7 @@ describe('LoginPage', () => {
             const spinner = queryByText('Loading...');
             expect(spinner).not.toBeInTheDocument();
         });
-
-        it('redirects to homepage after successful login', async () => {
+        it('redirects to homePage after successful login', async () => {
             const actions = {
                 postLogin: jest.fn().mockResolvedValue({})
             };

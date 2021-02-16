@@ -12,7 +12,6 @@ apiCalls.listUsers = jest.fn().mockResolvedValue({
 });
 
 describe('HomePage', () => {
-
     describe('Layout', () => {
         it('has root page div', () => {
             const { queryByTestId } = render(<HomePage />);
@@ -21,3 +20,5 @@ describe('HomePage', () => {
         });
     });
 });
+
+console.error = () => { };

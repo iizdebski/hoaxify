@@ -327,7 +327,7 @@ describe('UserSignupPage', () => {
       expect(errorMessage).not.toBeInTheDocument();
     });
 
-    it('redirects to homepage after successful signup', async () => {
+    it('redirects to homePage after successful signup', async () => {
       const actions = {
         postSignup: jest.fn().mockResolvedValue({})
       };
@@ -341,7 +341,6 @@ describe('UserSignupPage', () => {
 
       expect(history.push).toHaveBeenCalledWith('/');
     });
-
   });
 });
 
