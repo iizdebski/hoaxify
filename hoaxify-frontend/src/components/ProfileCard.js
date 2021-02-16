@@ -28,9 +28,14 @@ const ProfileCard = (props) => {
                             value={displayName}
                             label={`Change Display Name for ${username}`}
                             onChange={props.onChangeDisplayName}
+                            hasError={props.errors.displayName && true}
+                            error={props.errors.displayName}
                         />
-                        <input className="form-control-file mt-2" type="file"
-                            onChange={props.onFileSelect} />
+                        <input
+                            className="form-control-file mt-2"
+                            type="file"
+                            onChange={props.onFileSelect}
+                        />
                     </div>
                 )}
                 {showEditButton && (
@@ -66,6 +71,10 @@ const ProfileCard = (props) => {
             </div>
         </div>
     );
+};
+
+ProfileCard.defaultProps = {
+    errors: {}
 };
 
 export default ProfileCard;
