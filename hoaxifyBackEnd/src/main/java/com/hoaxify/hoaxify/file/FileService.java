@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
 
 import com.hoaxify.hoaxify.configuration.AppConfiguration;
@@ -29,4 +30,8 @@ public class FileService {
         return imageName;
     }
 
+    public String detectType(byte[] fileArr) {
+        Tika tika = new Tika();
+        return tika.detect(fileArr);
+    }
 }
