@@ -29,7 +29,7 @@ spring:
     # and to such your entities with database
     jpa:
       hibernate:
-        ddl-auto: update
+        ddl-auto: create
   mysql:
     console:
       enabled: false
