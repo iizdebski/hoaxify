@@ -2,10 +2,13 @@ package com.hoaxify.hoaxify.user;
 
 import java.beans.Transient;
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -13,6 +16,8 @@ import javax.validation.constraints.Size;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.hoaxify.hoaxify.hoax.Hoax;
 
 import lombok.Data;
 
@@ -45,6 +50,9 @@ public class User implements UserDetails{
 
     private String image;
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private List<Hoax> hoaxes;
+
     @Override
     @Transient
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -74,4 +82,5 @@ public class User implements UserDetails{
     public boolean isEnabled() {
         return true;
     }
+
 }
