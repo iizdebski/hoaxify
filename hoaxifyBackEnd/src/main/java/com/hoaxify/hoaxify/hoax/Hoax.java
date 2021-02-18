@@ -34,6 +34,5 @@ public class Hoax {
     private Date timestamp;
 
     @ManyToOne
-    @JsonIgnore
     private User user;
 }
