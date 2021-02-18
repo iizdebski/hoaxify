@@ -2,6 +2,8 @@ package com.hoaxify.hoaxify.hoax;
 
 import java.util.Date;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.hoaxify.hoaxify.user.User;
@@ -22,4 +24,7 @@ public class HoaxService {
         hoaxRepository.save(hoax);
     }
 
+    public Page<Hoax> getAllHoaxes(Pageable pageable) {
+        return hoaxRepository.findAll(pageable);
+    }
 }
