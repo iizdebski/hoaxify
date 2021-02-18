@@ -1,12 +1,10 @@
 import React from 'react';
 import { render, fireEvent, waitForDomChange } from '@testing-library/react';
 import HoaxSubmit from './HoaxSubmit';
-
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import authReducer from '../redux/authReducer';
 import * as apiCalls from '../api/apiCalls';
-import ButtonWithProgress from './ButtonWithProgress';
 
 const defaultState = {
     id: 1,
@@ -35,18 +33,16 @@ describe('HoaxSubmit', () => {
             const textArea = container.querySelector('textarea');
             expect(textArea).toBeInTheDocument();
         });
-        it(
-            'has image', () => {
-                const { container } = setup();
-                const image = container.querySelector('img');
-                expect(image).toBeInTheDocument();
-            });
-        it(
-            'displays textarea 1 line', () => {
-                const { container } = setup();
-                const textArea = container.querySelector('textarea');
-                expect(textArea.rows).toBe(1);
-            });
+        it('has image', () => {
+            const { container } = setup();
+            const image = container.querySelector('img');
+            expect(image).toBeInTheDocument();
+        });
+        it('has textarea', () => {
+            const { container } = setup();
+            const textArea = container.querySelector('textarea');
+            expect(textArea.rows).toBe(1);
+        });
         it('displays user image', () => {
             const { container } = setup();
             const image = container.querySelector('img');
@@ -60,7 +56,6 @@ describe('HoaxSubmit', () => {
             fireEvent.focus(textArea);
             expect(textArea.rows).toBe(3);
         });
-
         it('displays hoaxify button when focused to textarea', () => {
             const { container, queryByText } = setup();
             const textArea = container.querySelector('textarea');
@@ -122,7 +117,7 @@ describe('HoaxSubmit', () => {
             await waitForDomChange();
             expect(queryByText('Hoaxify')).not.toBeInTheDocument();
         });
-        it('clears content after successful postHoax action', async () => {
+        it('clear content after successful postHoax action', async () => {
             const { container, queryByText } = setup();
             const textArea = container.querySelector('textarea');
             fireEvent.focus(textArea);
@@ -146,7 +141,7 @@ describe('HoaxSubmit', () => {
 
             expect(queryByText('Test hoax content')).not.toBeInTheDocument();
         });
-        it('disables hoaxify button when there is postHoax api call', async () => {
+        it('disables Hoaxify button when there is postHoax api call', async () => {
             const { container, queryByText } = setup();
             const textArea = container.querySelector('textarea');
             fireEvent.focus(textArea);
@@ -236,31 +231,6 @@ describe('HoaxSubmit', () => {
 
             expect(queryByText('Hoaxify')).not.toBeDisabled();
         });
-        it('enables Hoaxify button when postHoax api call fails', async () => {
-            const { container, queryByText } = setup();
-            const textArea = container.querySelector('textarea');
-            fireEvent.focus(textArea);
-            fireEvent.change(textArea, { target: { value: 'Test hoax content' } });
-
-            const hoaxifyButton = queryByText('Hoaxify');
-
-            const mockFunction = jest.fn().mockRejectedValueOnce({
-                response: {
-                    data: {
-                        validationErrors: {
-                            content: 'It must have minimum 10 and maximum 5000 characters'
-                        }
-                    }
-                }
-            });
-
-            apiCalls.postHoax = mockFunction;
-            fireEvent.click(hoaxifyButton);
-
-            await waitForDomChange();
-
-            expect(queryByText('Hoaxify')).not.toBeDisabled();
-        });
         it('enables Cancel button when postHoax api call fails', async () => {
             const { container, queryByText } = setup();
             const textArea = container.querySelector('textarea');
@@ -301,5 +271,92 @@ describe('HoaxSubmit', () => {
             fireEvent.focus(textArea);
             expect(queryByText('Hoaxify')).not.toBeDisabled();
         });
+        it('displays validation error for content', async () => {
+            const { container, queryByText } = setup();
+            const textArea = container.querySelector('textarea');
+            fireEvent.focus(textArea);
+            fireEvent.change(textArea, { target: { value: 'Test hoax content' } });
+
+            const hoaxifyButton = queryByText('Hoaxify');
+
+            const mockFunction = jest.fn().mockRejectedValueOnce({
+                response: {
+                    data: {
+                        validationErrors: {
+                            content: 'It must have minimum 10 and maximum 5000 characters'
+                        }
+                    }
+                }
+            });
+
+            apiCalls.postHoax = mockFunction;
+            fireEvent.click(hoaxifyButton);
+
+            await waitForDomChange();
+
+            expect(
+                queryByText('It must have minimum 10 and maximum 5000 characters')
+            ).toBeInTheDocument();
+        });
+        it('clears validation error after clicking cancel', async () => {
+            const { container, queryByText } = setup();
+            const textArea = container.querySelector('textarea');
+            fireEvent.focus(textArea);
+            fireEvent.change(textArea, { target: { value: 'Test hoax content' } });
+
+            const hoaxifyButton = queryByText('Hoaxify');
+
+            const mockFunction = jest.fn().mockRejectedValueOnce({
+                response: {
+                    data: {
+                        validationErrors: {
+                            content: 'It must have minimum 10 and maximum 5000 characters'
+                        }
+                    }
+                }
+            });
+
+            apiCalls.postHoax = mockFunction;
+            fireEvent.click(hoaxifyButton);
+
+            await waitForDomChange();
+            fireEvent.click(queryByText('Cancel'));
+
+            expect(
+                queryByText('It must have minimum 10 and maximum 5000 characters')
+            ).not.toBeInTheDocument();
+        });
+        it('clears validation error after content is changed', async () => {
+            const { container, queryByText } = setup();
+            const textArea = container.querySelector('textarea');
+            fireEvent.focus(textArea);
+            fireEvent.change(textArea, { target: { value: 'Test hoax content' } });
+
+            const hoaxifyButton = queryByText('Hoaxify');
+
+            const mockFunction = jest.fn().mockRejectedValueOnce({
+                response: {
+                    data: {
+                        validationErrors: {
+                            content: 'It must have minimum 10 and maximum 5000 characters'
+                        }
+                    }
+                }
+            });
+
+            apiCalls.postHoax = mockFunction;
+            fireEvent.click(hoaxifyButton);
+
+            await waitForDomChange();
+            fireEvent.change(textArea, {
+                target: { value: 'Test hoax content updated' }
+            });
+
+            expect(
+                queryByText('It must have minimum 10 and maximum 5000 characters')
+            ).not.toBeInTheDocument();
+        });
     });
 });
+
+console.error = () => { };
