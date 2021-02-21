@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.hoaxify.hoaxify.file.FileAttachment;
+import com.hoaxify.hoaxify.file.FileAttachmentRepository;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,9 +51,13 @@ public class FileUploadControllerTest {
     @Autowired
     AppConfiguration appConfiguration;
 
+    @Autowired
+    FileAttachmentRepository fileAttachmentRepository;
+
     @Before
     public void init() throws IOException {
         userRepository.deleteAll();
+        fileAttachmentRepository.deleteAll();
         testRestTemplate.getRestTemplate().getInterceptors().clear();
         FileUtils.cleanDirectory(new File(appConfiguration.getFullAttachmentsPath()));
     }
@@ -82,6 +87,32 @@ public class FileUploadControllerTest {
         assertThat(response.getBody().getName()).isNotEqualTo("profile.png");
     }
 
+    @Test
+    public void uploadFile_withImageFromAuthorizedUser_imageSavedToFolder() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        ResponseEntity<FileAttachment> response = uploadFile(getRequestEntity(), FileAttachment.class);
+        String imagePath = appConfiguration.getFullAttachmentsPath() + "/" + response.getBody().getName();
+        File storedImage = new File(imagePath);
+        assertThat(storedImage.exists()).isTrue();
+    }
+
+    @Test
+    public void uploadFile_withImageFromAuthorizedUser_fileAttachmentSavedToDatabase() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        uploadFile(getRequestEntity(), FileAttachment.class);
+        assertThat(fileAttachmentRepository.count()).isEqualTo(1);
+    }
+
+    @Test
+    public void uploadFile_withImageFromAuthorizedUser_fileAttachmentStoredWithFileType() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        uploadFile(getRequestEntity(), FileAttachment.class);
+        FileAttachment storeFile = fileAttachmentRepository.findAll().get(0);
+        assertThat(storeFile.getFileType()).isEqualTo("image/png");
+    }
 
     @Test
     public void uploadFile_withImageFromUnauthorizedUser_receiveUnauthorized() {

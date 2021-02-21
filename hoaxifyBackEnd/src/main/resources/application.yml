@@ -69,5 +69,3 @@ spring:
   profiles: test
 hoaxify:
   upload-path: uploads-test
-
-
