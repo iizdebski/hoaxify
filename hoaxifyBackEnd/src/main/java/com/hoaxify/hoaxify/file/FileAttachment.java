@@ -1,5 +1,6 @@
 package com.hoaxify.hoaxify.file;
 
+import com.hoaxify.hoaxify.hoax.Hoax;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -19,4 +20,7 @@ public class FileAttachment {
     private String name;
 
     private String fileType;
+
+    @OneToOne
+    private Hoax hoax;
 }
