@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.IOException;
 
+import com.hoaxify.hoaxify.file.FileAttachment;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,6 +63,23 @@ public class FileUploadControllerTest {
         authenticate("user1");
         ResponseEntity<Object> response = uploadFile(getRequestEntity(), Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void uploadFile_withImageFromAuthorizedUser_receiveFileAttachmentWithDate() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        ResponseEntity<FileAttachment> response = uploadFile(getRequestEntity(), FileAttachment.class);
+        assertThat(response.getBody().getDate()).isNotNull();
+    }
+
+    @Test
+    public void uploadFile_withImageFromAuthorizedUser_receiveFileAttachmentWithRandomName() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        ResponseEntity<FileAttachment> response = uploadFile(getRequestEntity(), FileAttachment.class);
+        assertThat(response.getBody().getName()).isNotNull();
+        assertThat(response.getBody().getName()).isNotEqualTo("profile.png");
     }
 
 
