@@ -12,7 +12,8 @@ class HoaxSubmit extends Component {
         pendingApiCall: false,
         errors: {},
         file: undefined,
-        image: undefined
+        image: undefined,
+        attachment: undefined
     };
 
     onChangeContent = (event) => {
@@ -30,24 +31,43 @@ class HoaxSubmit extends Component {
             this.setState({
                 image: reader.result,
                 file
+            }, () => {
+                this.uploadFile()
             });
         };
         reader.readAsDataURL(file);
     };
 
+    uploadFile = () => {
+        const body = new FormData();
+        body.append('file', this.state.file);
+        apiCalls.postHoaxFile(body).then(response => {
+            this.setState({ attachemnt: response.data })
+        });
+    };
+
+    resetState = () => {
+        this.setState({
+            pendingApiCall: false,
+            focused: false,
+            content: '',
+            errors: {},
+            image: undefined,
+            file: undefined,
+            attachment: undefined
+        });
+    };
+
     onClickHoaxify = () => {
         const body = {
-            content: this.state.content
+            content: this.state.content,
+            attachment: this.state.attachment
         };
         this.setState({ pendingApiCall: true });
         apiCalls
             .postHoax(body)
             .then((response) => {
-                this.setState({
-                    focused: false,
-                    content: '',
-                    pendingApiCall: false
-                });
+                this.resetState();
             })
             .catch((error) => {
                 let errors = {};
@@ -61,16 +81,6 @@ class HoaxSubmit extends Component {
     onFocus = () => {
         this.setState({
             focused: true
-        });
-    };
-
-    onClickCancel = () => {
-        this.setState({
-            focused: false,
-            content: '',
-            errors: {},
-            image: undefined,
-            file: undefined
         });
     };
 
@@ -124,7 +134,7 @@ class HoaxSubmit extends Component {
                                 />
                                 <button
                                     className="btn btn-light ml-1"
-                                    onClick={this.onClickCancel}
+                                    onClick={this.resetState}
                                     disabled={this.state.pendingApiCall}
                                 >
                                     <i className="fas fa-times"></i> Cancel
