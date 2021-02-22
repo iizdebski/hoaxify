@@ -28,12 +28,15 @@ class HoaxSubmit extends Component {
         const file = event.target.files[0];
         let reader = new FileReader();
         reader.onloadend = () => {
-            this.setState({
-                image: reader.result,
-                file
-            }, () => {
-                this.uploadFile()
-            });
+            this.setState(
+                {
+                    image: reader.result,
+                    file
+                },
+                () => {
+                    this.uploadFile();
+                }
+            );
         };
         reader.readAsDataURL(file);
     };
@@ -41,8 +44,8 @@ class HoaxSubmit extends Component {
     uploadFile = () => {
         const body = new FormData();
         body.append('file', this.state.file);
-        apiCalls.postHoaxFile(body).then(response => {
-            this.setState({ attachemnt: response.data })
+        apiCalls.postHoaxFile(body).then((response) => {
+            this.setState({ attachment: response.data });
         });
     };
 
