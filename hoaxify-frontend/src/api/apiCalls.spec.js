@@ -148,9 +148,18 @@ describe('apiCalls', () => {
         it('calls /api/1.0/hoaxes/upload', () => {
             const mockPostHoaxFile = jest.fn();
             axios.post = mockPostHoaxFile;
-            apiCalls.mockPostHoaxFile();
+            apiCalls.postHoaxFile();
             const path = mockPostHoaxFile.mock.calls[0][0];
             expect(path).toBe('/api/1.0/hoaxes/upload');
+        });
+    });
+    describe('deleteHoax', () => {
+        it('calls /api/1.0/hoaxes/5 when hoax id param provided as 5', () => {
+            const mockDelete = jest.fn();
+            axios.delete = mockDelete;
+            apiCalls.deleteHoax(5);
+            const path = mockDelete.mock.calls[0][0];
+            expect(path).toBe('/api/1.0/hoaxes/5');
         });
     });
 });
