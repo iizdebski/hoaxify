@@ -3,13 +3,13 @@ package com.hoaxify.hoaxify.hoax;
 import java.util.Date;
 import java.util.List;
 
-import com.hoaxify.hoaxify.file.FileAttachment;
-import com.hoaxify.hoaxify.file.FileAttachmentRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.hoaxify.hoaxify.file.FileAttachment;
+import com.hoaxify.hoaxify.file.FileAttachmentRepository;
 import com.hoaxify.hoaxify.user.User;
 import com.hoaxify.hoaxify.user.UserService;
 
@@ -93,5 +93,9 @@ public class HoaxService {
         return (root, query, criteriaBuilder) -> {
             return criteriaBuilder.greaterThan(root.get("id"), id);
         };
+    }
+
+    public void deleteHoax(long id) {
+        hoaxRepository.deleteById(id);
     }
 }

@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -13,10 +14,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 
-import com.hoaxify.hoaxify.configuration.AppConfiguration;
-import com.hoaxify.hoaxify.file.FileAttachment;
-import com.hoaxify.hoaxify.file.FileAttachmentRepository;
-import com.hoaxify.hoaxify.file.FileService;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -35,16 +32,21 @@ import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.hoaxify.hoaxify.configuration.AppConfiguration;
 import com.hoaxify.hoaxify.error.ApiError;
+import com.hoaxify.hoaxify.file.FileAttachment;
+import com.hoaxify.hoaxify.file.FileAttachmentRepository;
+import com.hoaxify.hoaxify.file.FileService;
 import com.hoaxify.hoaxify.hoax.Hoax;
 import com.hoaxify.hoaxify.hoax.HoaxRepository;
 import com.hoaxify.hoaxify.hoax.HoaxService;
 import com.hoaxify.hoaxify.hoax.vm.HoaxVM;
+import com.hoaxify.hoaxify.shared.GenericResponse;
 import com.hoaxify.hoaxify.user.User;
 import com.hoaxify.hoaxify.user.UserRepository;
 import com.hoaxify.hoaxify.user.UserService;
-import org.springframework.web.multipart.MultipartFile;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -270,7 +272,6 @@ public class HoaxControllerTest {
         hoax.setAttachment(savedFile);
         ResponseEntity<HoaxVM> response = postHoax(hoax, HoaxVM.class);
 
-        Hoax inDB = hoaxRepository.findById(response.getBody().getId()).get();
         assertThat(response.getBody().getAttachment().getName()).isEqualTo(savedFile.getName());
     }
 
@@ -567,6 +568,49 @@ public class HoaxControllerTest {
         assertThat(response.getBody().get("count")).isEqualTo(1);
     }
 
+    @Test
+    public void deleteHoax_whenUserIsUnAuthorized_receiveUnauthorized() {
+        ResponseEntity<Object> response = deleteHoax(555, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    public void deleteHoax_whenUserIsAuthorized_receiveOk() {
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        Hoax hoax = hoaxService.save(user, TestUtil.createValidHoax());
+
+        ResponseEntity<Object> response = deleteHoax(hoax.getId(), Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+    }
+
+    @Test
+    public void deleteHoax_whenUserIsAuthorized_receiveGenericResponse() {
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        Hoax hoax = hoaxService.save(user, TestUtil.createValidHoax());
+
+        ResponseEntity<GenericResponse> response = deleteHoax(hoax.getId(), GenericResponse.class);
+        assertThat(response.getBody().getMessage()).isNotNull();
+
+    }
+
+    @Test
+    public void deleteHoax_whenUserIsAuthorized_hoaxRemovedFromDatabase() {
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        Hoax hoax = hoaxService.save(user, TestUtil.createValidHoax());
+
+        deleteHoax(hoax.getId(), Object.class);
+        Optional<Hoax> inDB = hoaxRepository.findById(hoax.getId());
+        assertThat(inDB.isPresent()).isFalse();
+
+    }
+
+    public <T> ResponseEntity<T> deleteHoax(long hoaxId, Class<T> responseType){
+        return testRestTemplate.exchange(API_1_0_HOAXES + "/" + hoaxId, HttpMethod.DELETE, null, responseType);
+    }
 
     public <T> ResponseEntity<T> getNewHoaxCount(long hoaxId, ParameterizedTypeReference<T> responseType){
         String path = API_1_0_HOAXES + "/" + hoaxId +"?direction=after&count=true";
