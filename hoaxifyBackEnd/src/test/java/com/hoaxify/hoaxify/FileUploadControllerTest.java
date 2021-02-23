@@ -8,9 +8,8 @@ import java.io.IOException;
 import com.hoaxify.hoaxify.file.FileAttachment;
 import com.hoaxify.hoaxify.file.FileAttachmentRepository;
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -32,7 +31,6 @@ import com.hoaxify.hoaxify.configuration.AppConfiguration;
 import com.hoaxify.hoaxify.user.UserRepository;
 import com.hoaxify.hoaxify.user.UserService;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class FileUploadControllerTest {
@@ -54,7 +52,7 @@ public class FileUploadControllerTest {
     @Autowired
     FileAttachmentRepository fileAttachmentRepository;
 
-    @Before
+    @BeforeEach
     public void init() throws IOException {
         userRepository.deleteAll();
         fileAttachmentRepository.deleteAll();
@@ -141,5 +139,4 @@ public class FileUploadControllerTest {
         testRestTemplate.getRestTemplate()
                 .getInterceptors().add(new BasicAuthenticationInterceptor(username, "P4ssword"));
     }
-
 }
