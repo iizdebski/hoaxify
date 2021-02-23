@@ -28,10 +28,16 @@ let timedFunction;
 
 const useFakeIntervals = () => {
     window.setInterval = (callback, interval) => {
-        timedFunction = callback;
+        console.log(callback.toString());
+        if (!callback.toString().startsWith('function')) {
+            timedFunction = callback;
+            return 111111;
+        }
     };
-    window.clearInterval = () => {
-        timedFunction = undefined;
+    window.clearInterval = (id) => {
+        if (id === 111111) {
+            timedFunction = undefined;
+        }
     };
 };
 
