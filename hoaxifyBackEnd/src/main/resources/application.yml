@@ -20,6 +20,7 @@
 #        default-page-size: 10
 #        max-page-size: 100
 
+
 spring:
   datasource:
     driverClassName: com.mysql.jdbc.Driver
