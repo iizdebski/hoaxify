@@ -26,7 +26,7 @@ spring:
     driverClassName: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/hoaxify
     username: root
-    password: root
+    password: password
   jpa:
     properties:
       javax:
@@ -48,7 +48,7 @@ spring:
     # jdbc url for mysql db
     url: jdbc:mysql://localhost:3306/hoaxify
     username: root
-    password: root
+    password: password
     # and to such your entities with database
     jpa:
       hibernate:
