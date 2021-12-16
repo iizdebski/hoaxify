@@ -1,9 +1,11 @@
 # Social Sharing Platform - Test Driven Development (TDD)
 
-## ***Technologies used:***
+## ***Technologies:***
 
 * **SpringBoot**
 * **RestFul API**
+* **JUnit, Mockito**
+* **Jest**
 * **MySQL**
 * **Validation, internationalization (i18n), static resource serving, caching, json manipulation**
 * **Spring Data**
